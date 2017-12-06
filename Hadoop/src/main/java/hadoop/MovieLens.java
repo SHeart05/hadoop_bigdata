@@ -90,11 +90,11 @@ public class MovieLens {
             job.setOutputValueClass(IntWritable.class);
 
             //Set Input files
-            if (args[2].equals("1")) {
+            if (args[1].equals("1")) {
                 FileInputFormat.addInputPath(job, inputJSONs.get(ONEMILLION));
-            } else if (args[2].equals("10")){
+            } else if (args[1].equals("10")){
                 FileInputFormat.addInputPath(job, inputJSONs.get(TENMILLION));
-            }else if (args[2].equals("20")){
+            }else if (args[1].equals("20")){
                 FileInputFormat.addInputPath(job, inputJSONs.get(TWENTYMILLION));
             }else {
                 throw new RuntimeException("No Dataset is choosed at second Parameter! e.g. $ADOOP_HOME/bin/hadoop jar xx.jar 1 20");
