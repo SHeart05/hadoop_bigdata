@@ -2,7 +2,7 @@ package hadoop;
 
 import hadoop.map_reduce.countuserratings.IntSumUserIdRatingsReducer;
 import hadoop.map_reduce.countuserratings.TokenizerUserIdRatingsMapper;
-import hadoop.map_reduce.filmratinggreaterfour.IntSumFilmGreaterFourReducer;
+import hadoop.map_reduce.filmratinggreaterfour.DoubleAvgFilmGreaterFourReducer;
 import hadoop.map_reduce.filmratinggreaterfour.TokenizerFilmGreaterFourMapper;
 import hadoop.map_reduce.filmtitle.SelectUserFilmTitleReducer;
 import hadoop.map_reduce.filmtitle.TokenizerFilmTitleMapper;
@@ -10,6 +10,7 @@ import hadoop.map_reduce.rating.IntSumRatingReducer;
 import hadoop.map_reduce.rating.TokenizerRatingMapper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -57,6 +58,7 @@ public class MovieLens {
                 job.setMapperClass(TokenizerRatingMapper.class);
                 job.setCombinerClass(IntSumRatingReducer.class);
                 job.setReducerClass(IntSumRatingReducer.class);
+                job.setOutputValueClass(IntWritable.class);
 
                 output = new Path("/TESTING/JSON/OUTPUT/TASKONE");
 
@@ -65,6 +67,7 @@ public class MovieLens {
                 job.setMapperClass(TokenizerFilmTitleMapper.class);
                 job.setCombinerClass(SelectUserFilmTitleReducer.class);
                 job.setReducerClass(SelectUserFilmTitleReducer.class);
+                job.setOutputValueClass(IntWritable.class);
 
                 output = new Path("/TESTING/JSON/OUTPUT/TASKTWO");
             } else if (args[0].equals("3")) {
@@ -72,22 +75,22 @@ public class MovieLens {
                 job.setMapperClass(TokenizerUserIdRatingsMapper.class);
                 job.setCombinerClass(IntSumUserIdRatingsReducer.class);
                 job.setReducerClass(IntSumUserIdRatingsReducer.class);
+                job.setOutputValueClass(IntWritable.class);
 
                 output = new Path("/TESTING/JSON/OUTPUT/TASKTHREE");
             } else if (args[0].equals("4")){
                 //###   Anfrage 4: Ausgabe aller Filme mit einer durchschnittlichen Bewertung >= 4.0
                 job.setMapperClass(TokenizerFilmGreaterFourMapper.class);
-                job.setCombinerClass(IntSumFilmGreaterFourReducer.class);
-                job.setReducerClass(IntSumFilmGreaterFourReducer.class);
+                job.setCombinerClass(DoubleAvgFilmGreaterFourReducer.class);
+                job.setReducerClass(DoubleAvgFilmGreaterFourReducer.class);
+                job.setOutputValueClass(DoubleWritable.class);
 
                 output = new Path("/TESTING/JSON/OUTPUT/TASKFOUR");
             } else {
                 throw new RuntimeException("No Task in first Parameter is choosed! e.g.  $HADOOP_HOME/bin/hadoop jar xx.jar 1 1");
             }
 
-
             job.setOutputKeyClass(Text.class);
-            job.setOutputValueClass(IntWritable.class);
 
             //Set Input files
             if (args[1].equals("1")) {

@@ -29,10 +29,10 @@ public class TokenizerFilmTitleMapper extends Mapper<Object, Text, Text, IntWrit
                 JSONObject obj = new JSONObject(line);
                 title = obj.getString("title");
                 JSONArray ratings = obj.getJSONArray("ratings");
+                word.set(title);
 
                 // Count every Ratings JSONObject - {user_id: ..., ratings: ...}
                 for (int i = 0; i < ratings.length(); i++) {
-                    word.set(title);
                     //Map => Pair { title: "Terminator", 1 }
                     context.write(word,
                             new IntWritable(ratings.getJSONObject(i).getInt("userId")));
