@@ -1,0 +1,3 @@
+hadoop/MovieLens.class
+hadoop/map_reduce/rating/IntSumRatingReducer.class
+hadoop/map_reduce/rating/TokenizerRatingMapper.class
