@@ -1,5 +1,11 @@
 package hadoop;
 
+import hadoop.map_reduce.countuserratings.IntSumUserIdRatingsReducer;
+import hadoop.map_reduce.countuserratings.TokenizerUserIdRatingsMapper;
+import hadoop.map_reduce.filmratinggreaterfour.IntSumFilmGreaterFourReducer;
+import hadoop.map_reduce.filmratinggreaterfour.TokenizerFilmGreaterFourMapper;
+import hadoop.map_reduce.filmtitle.SelectUserFilmTitleReducer;
+import hadoop.map_reduce.filmtitle.TokenizerFilmTitleMapper;
 import hadoop.map_reduce.rating.IntSumRatingReducer;
 import hadoop.map_reduce.rating.TokenizerRatingMapper;
 import org.apache.hadoop.conf.Configuration;
@@ -27,11 +33,13 @@ public class MovieLens {
     public static void main (String args[]) {
         List<Path> inputJSONs = new ArrayList<Path>();
 
-        inputJSONs.add(new Path("/TESTING/JSON/input"));
+        inputJSONs.add(new Path("/TESTING/JSON/INPUT/ONEM"));
+        inputJSONs.add(new Path("/TESTING/JSON/INPUT/TENM"));
+        inputJSONs.add(new Path("/TESTING/JSON/INPUT/TWENTYM"));
 
-        List<Path> outputJSONs = new ArrayList<Path>();
+        Path output = null;
 
-        outputJSONs.add(new Path("/TESTING/JSON/output"));
+
 
         try {
 
@@ -43,16 +51,56 @@ public class MovieLens {
 
             Job job = Job.getInstance(conf, "ratings count");
             job.setJarByClass(MovieLens.class);
-            job.setMapperClass(TokenizerRatingMapper.class);
-            job.setCombinerClass(IntSumRatingReducer.class);
-            job.setReducerClass(IntSumRatingReducer.class);
+
+            if (args[0].equals("1")) {
+                //###   Anfrage 1: Ausgabe der Anzahl aller Ratings ###
+                job.setMapperClass(TokenizerRatingMapper.class);
+                job.setCombinerClass(IntSumRatingReducer.class);
+                job.setReducerClass(IntSumRatingReducer.class);
+
+                output = new Path("/TESTING/JSON/OUTPUT/TASKONE");
+
+            } else if (args[0].equals("2")) {
+                //###   Anfrage 2: Ausgabe aller Filmtitel, die der Nutzer mit der ID = 10 bewertet hat
+                job.setMapperClass(TokenizerFilmTitleMapper.class);
+                job.setCombinerClass(SelectUserFilmTitleReducer.class);
+                job.setReducerClass(SelectUserFilmTitleReducer.class);
+
+                output = new Path("/TESTING/JSON/OUTPUT/TASKTWO");
+            } else if (args[0].equals("3")) {
+                //###   Anfrage 3: Ausgabe der Anzahl aller Ratings zu jedem Nutzer
+                job.setMapperClass(TokenizerUserIdRatingsMapper.class);
+                job.setCombinerClass(IntSumUserIdRatingsReducer.class);
+                job.setReducerClass(IntSumUserIdRatingsReducer.class);
+
+                output = new Path("/TESTING/JSON/OUTPUT/TASKTHREE");
+            } else if (args[0].equals("4")){
+                //###   Anfrage 4: Ausgabe aller Filme mit einer durchschnittlichen Bewertung >= 4.0
+                job.setMapperClass(TokenizerFilmGreaterFourMapper.class);
+                job.setCombinerClass(IntSumFilmGreaterFourReducer.class);
+                job.setReducerClass(IntSumFilmGreaterFourReducer.class);
+
+                output = new Path("/TESTING/JSON/OUTPUT/TASKFOUR");
+            } else {
+                throw new RuntimeException("No Task in first Parameter is choosed! e.g.  $HADOOP_HOME/bin/hadoop jar xx.jar 1 1");
+            }
+
+
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(IntWritable.class);
 
             //Set Input files
-            FileInputFormat.addInputPath(job, inputJSONs.get(ONEMILLION));
+            if (args[2].equals("1")) {
+                FileInputFormat.addInputPath(job, inputJSONs.get(ONEMILLION));
+            } else if (args[2].equals("10")){
+                FileInputFormat.addInputPath(job, inputJSONs.get(TENMILLION));
+            }else if (args[2].equals("20")){
+                FileInputFormat.addInputPath(job, inputJSONs.get(TWENTYMILLION));
+            }else {
+                throw new RuntimeException("No Dataset is choosed at second Parameter! e.g. $ADOOP_HOME/bin/hadoop jar xx.jar 1 20");
+            }
             //Set Output Paths
-            FileOutputFormat.setOutputPath(job, outputJSONs.get(ONEMILLION));
+            FileOutputFormat.setOutputPath(job, output);
 
             //Execute MapReduce Algorithm
             System.exit(job.waitForCompletion(true) ? 0 : 1);
