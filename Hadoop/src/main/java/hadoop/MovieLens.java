@@ -27,19 +27,20 @@ public class MovieLens {
     public static void main (String args[]) {
         List<Path> inputJSONs = new ArrayList<Path>();
 
-        inputJSONs.add(new Path("/TESTING/JSON/input/movies_1m.json"));
-        inputJSONs.add(new Path("/TESTING/JSON/input/movies_10m.json"));
-        inputJSONs.add(new Path("/TESTING/JSON/input/movies_20m.json"));
+        inputJSONs.add(new Path("/TESTING/JSON/input"));
 
         List<Path> outputJSONs = new ArrayList<Path>();
 
-        inputJSONs.add(new Path("/TESTING/JSON/output"));
-        inputJSONs.add(new Path("/TESTING/JSON/output"));
-        inputJSONs.add(new Path("/TESTING/JSON/output"));
+        outputJSONs.add(new Path("/TESTING/JSON/output"));
 
         try {
 
             Configuration conf = new Configuration();
+
+            // /opt/hadoop-2.7.3/etc/hadoop/
+            conf.addResource(new Path("/opt/hadoop-2.7.3/etc/hadoop/core-site.xml"));
+            conf.addResource(new Path("/opt/hadoop-2.7.3/etc/hadoop/hdfs-site.xml"));
+
             Job job = Job.getInstance(conf, "ratings count");
             job.setJarByClass(MovieLens.class);
             job.setMapperClass(TokenizerRatingMapper.class);
